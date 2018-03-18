@@ -22,7 +22,7 @@ over those. But hopefully someone will find them useful. If you do want to try r
 I've made an effort to, given a certain exercise, only use the bits of Python which are covered in the textbook prior to that 
 exercise. This leads to some examples of very verbose code which would be made much more elegant with a simple function 
 available elsewhere, but I don't think that's in the spirit of the text. If I made a mistake somewhere, and you see a package 
-imported somewhere which you don't have installed, you can [install it with pip] (https://pypi.python.org/pypi/pip).
+imported somewhere which you don't have installed, you can [install it with pip](https://pypi.python.org/pypi/pip).
 
 ## Errata
 If you find an error, typo or poor explaination anywhere, please do let me know: 
