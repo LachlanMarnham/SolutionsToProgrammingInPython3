@@ -1,4 +1,5 @@
-# Solutions to: Programming in Python 3, by Mark Summerfield (solutions by Lachlan Marnham)
+# Solutions to Programming in Python 3: A Complete Introduction to the Python Language 
+# by Mark Summerfield (solutions by Lachlan Marnham)
 I like to solve textbook problems for fun. I am providing them for public consumption under the assumption that they will be 
 used by people to complement self-study. They are not intended for use by school/university students who were assigned 
 problems from the textbook by an instructor. If you are a school/university student who was assigned problems from the 
