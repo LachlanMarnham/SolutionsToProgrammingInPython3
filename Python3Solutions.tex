@@ -72,8 +72,9 @@
 \author{Solutions by: Lachlan Marnham}
 \date{Last updated: \today}
 \maketitle
-
+\tableofcontents
 \chapter*{Preface}
+\addcontentsline{toc}{chapter}{Preface}
 I like to solve textbook problems for fun. I am providing them for public consumption under the assumption that they will be 
 used by people to complement self-study. They are not intended for use by school/university students who were assigned 
 problems from the textbook by an instructor. If you are a school/university student who was assigned problems from the 
@@ -109,8 +110,11 @@ writing python 2.x code and checking it with the corresponding interpreter.
 \item \href{https://www.reddit.com/r/Python/}{Python Subreddit}
 \item \href{https://www.quora.com}{Quora}
 \end{itemize}
-\chapter{} %Chapter 1
+\chapter*{Chapter 1} %Chapter 1
+
+\addcontentsline{toc}{chapter}{Chapter 1}
 \section*{Exercise 1}
+\addcontentsline{toc}{section}{Exercise 1}
  
 \begin{lstlisting}[language=Python, style=pythonStyle]
 import sys
@@ -178,7 +182,7 @@ Please enter a valid integer as the argument at the command line.
 \end{lstlisting}
 
 \section*{Exercise 2}
-
+\addcontentsline{toc}{section}{Exercise 2}
 \begin{lstlisting}[language=Python, style=pythonStyle]
 # initialise relevant objects
 numbers = []
@@ -279,6 +283,7 @@ I've assumed that the author didn't implement any of these, and instead made a s
 \indent One might complain that this has only relaxed the problem enough to take account of the full set of real numbers. True, but the author wanted us to print the largest and smallest of the set of numbers entered, and it's not possible to even define the concept of `greater than' or `less than' across the rest of the complex plane. I think it's safe to assume we can stick to the real numbers.
 \newpage
 \section*{Exercise 3}
+\addcontentsline{toc}{section}{Exercise 3}
 \begin{lstlisting}[language=Python, style=pythonStyle]
 from random import choice, randint
 
@@ -344,6 +349,7 @@ a dog sang badly.
 \end{lstlisting}
 \newpage
 \section*{Exercise 4}
+\addcontentsline{toc}{section}{Exercise 4}
 \begin{lstlisting}[language=Python, style=pythonStyle]
 from random import choice, randint
 
@@ -443,6 +449,7 @@ the octopus jumped well.
 \end{lstlisting}
 
 \section*{Exercise 5}
+\addcontentsline{toc}{section}{Exercise 5}
 \begin{lstlisting}[language=Python, style=pythonStyle]
 from math import floor
 
@@ -533,15 +540,27 @@ A few things work differently here when compared to Exercise 2. Firstly the \ver
 \indent There is no shortage of algorithms which could sort our numbers, but Bubble Sort strikes a nice balance between being very intuitive and not being \textit{too} brute-forcey. Here's how it works:
 \vspace{8px}
 \begin{enumerate}
-\item Initialize \verb|swapped_flag| which is \verb|False| until two numbers have been swapped on the current loop. It is then set to \verb|True| until the end of that loop, when it becomes \verb|False| again.
-\item Look at the elements of the list with indices 0 and 1. If the latter is smaller than the former, swap them and set \verb|swapped_flag==True|. Otherwise do nothing.
-\item Repeat step 2 with elements 1 and 2, then 2 and 3, and so on until you have reached the end of the list.
-\item If, on the current run through the loop, none of the neighbouring elements were swapped, then at this stage \verb|swapped_flag==False| and the list is sorted. Otherwise, set \verb|swapped_flag==True| and return control to the beginning of the loop.
+\item Before looping through the numbers, initialize \verb|swapped_flag| which is \verb|False| until two numbers have been swapped on the current loop. It is then set to \verb|True| until the end of that loop, when it becomes \verb|False| again.
+\item Look at the elements of the \verb|list| with indices 0 and 1. If the latter is smaller than the former, swap them and set \verb|swapped_flag==True|. Otherwise do nothing.
+\item Repeat step 2 with elements 1 and 2, then 2 and 3, and so on for the whole  \verb|list|. 
+\item If, on the current run through the loop, none of the neighbouring elements were swapped, then at this stage \verb|swapped_flag==False| and the \verb|list| is sorted. Otherwise, set \verb|swapped_flag==True| and return control to the beginning of the loop.
 \end{enumerate}
-\begin{figure}[t]
+\begin{figure}[h]
 \centering
 \includegraphics[width=0.8\linewidth]{Graphics/bubble_sort.pdf}
 \caption{Schematic of Bubble Sort on a list.}
 \label{fig_bubble_sort}
 \end{figure}
+As described above, we will end up with an algorithm which has worst--case complexity $\left(n-1\right)^2=\mathcal{O}\left(n^2\right)$ (where $n$ is the length of the \verb|list|). To see this, note that each time we run through the \verb|while| loop we will check $n-1$ pairs (and, perhaps, swap them). But in the worst-case scenario, we would have to run through that loop $n-1$ times.\\
+\indent But it is never necessary to do so many steps, because on the first run through the loop, the largest number will definitely be in its final place. On the second run through the loop, the second--last number will be in place, and so on. In general, on the $k^{\text{th}}$ run through the loop, we only need to check the $(n-k)^{\text{th}}$ pair of neighbours. The worst-case total number of steps is therefore:
+\begin{align}
+\sum_{k=1}^{n-1}\left(n-k\right)&=n\sum_{k=1}^{n-1}1-\sum_{k=1}^{n-1}k\nonumber\\
+&=n^2-n-\frac{n^2-n}{2}\\
+&=\frac{n^2-n}{2}.\nonumber
+\end{align}
+Still $\mathcal{O}\left(n^2\right)$, but definitely faster. Therefore, this optimisation was implemented on line 24 of the code in the instantiation of the \verb|for| loop.
+\chapter*{Chapter 2} %Chapter 2
+\addcontentsline{toc}{chapter}{Chapter 2}
+\section*{Exercise 1}
+\addcontentsline{toc}{section}{Exercise 1}
 \end{document}
