@@ -1,17 +1,24 @@
 import sys
 from xml.sax.saxutils import escape
 
+
 def main():
+    # Get files from command line.
+    # Usage: python3 Ch02Ex03.py <input_filename> <output_filename>
+    input_filename = sys.argv[1]
+    output_filename = sys.argv[2]
     max_width = 100
     table = ""
     table += print_start()
     count = 0
-    input_filename = sys.argv[1]
-    output_filename = sys.argv[2]
+
+    # Read in data from file instead, instead of with call to input()
     file_object = open(input_filename, "r")
     data = file_object.read()
     file_object.close()
-    lines = data.split('\n')
+
+    # Convert data to html
+    lines = data.splitlines()
     for line in lines:
         try:
             if count == 0:
@@ -25,10 +32,11 @@ def main():
         except EOFError:
             break
     table += print_end()
+
+    # Dump html into output file
     output_file_object = open(output_filename, "w")
     output_file_object.write(table)
     output_file_object.close()
-
 
 
 def print_start():
@@ -68,20 +76,20 @@ def extract_fields(line):
     quote = None
     for c in line:
         if c in "\"'":
-            if quote is None: # start of quoted string
+            if quote is None:           # start of quoted string
                 quote = c
-            elif quote == c: # end of quoted string
+            elif quote == c:            # end of quoted string
                 quote = None
             else:
-                field += c # other quote inside quoted string
+                field += c              # other quote inside quoted string
             continue
-        if quote is None and c == ",": #end of a field
+        if quote is None and c == ",":  # end of a field
             fields.append(field)
             field = ""
         else:
-            field += c # accumulating a field
+            field += c                  # accumulating a field
     if field:
-        fields.append(field) #adding the last field
+        fields.append(field)            # adding the last field
     return fields
 
 
