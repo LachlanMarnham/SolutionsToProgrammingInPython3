@@ -1,6 +1,7 @@
 \documentclass{report}
 \usepackage[a4paper,left=2.5cm, right=2.5cm, top=2.5cm, bottom=3.0cm]{geometry}
 \usepackage[utf8]{inputenc}
+\usepackage{pmboxdraw}
 \usepackage[formats]{listings}
 \usepackage{color}
 \usepackage{amsmath}
@@ -599,6 +600,214 @@ if len(sys.argv) > 1:
 
 if words:
     print_unicode_table(words)
+
+\end{lstlisting}
+This exercise required only minimal changes to implement searching for multiple words. The program will read in the list of optional string arguments, should they be provided by the user. We then loop through all of the code points between \verb|ord(" ")==32| and \verb|min(0xD800, sys.maxunicode)|. Here, the choise to start at 32 is because the \verb|unicodedata| module does not store names for unicode characters with codepoints below 32. This includes some control characters (e.g. \verb|code(`\n')==10|). The maximum code point is chosen to:
+\begin{itemize}
+\item Always be less than the maximum unicode character available to the system, and
+\item Avoid being so large that surrogate pairs (where large code points are represented by two hex numbers instead of one) are excluded.
+\end{itemize}
+The code then loops through all of the code points in that range. For each one, it finds the corresponding name of the character. If all of the strings provided by the user at runtime are in the character name, it is printed (along with the code point in decimal and hex notation, and the character itself).
+\section*{Exercise 2}
+\addcontentsline{toc}{section}{Exercise 2}
+\begin{lstlisting}[language=Python, style=pythonStyle]
+import cmath
+import math
+import sys
+
+
+def get_float(msg, allow_zero):
+    x = None
+    while x is None:
+        try:
+            x = float(input(msg))
+            if not allow_zero and abs(x) < sys.float_info.epsilon:
+                print("zero is not allowed")
+                x = None
+        except ValueError as err:
+            print(err)
+    return x
+
+
+# Fix formatting of numbers like (-1-2j)-->-(1+2j) and (-1+2j)-->-(1-2j)
+def fix_complex_sign(number):
+    if number.real < 0:
+        if number.imag < 0:
+            new_number = complex(abs(number.real), abs(number.imag))
+            changed_flag = True
+        else:
+            new_number = complex(abs(number.real), -abs(number.imag))
+            changed_flag = True
+    else:
+        new_number = number
+        changed_flag = True
+    if abs(new_number.real) < sys.float_info.epsilon:
+        new_number = complex(abs(new_number.real), new_number.imag)
+    return new_number, changed_flag
+
+
+def make_equation(a, b, c, x_1, x_2):
+    a_template = "{a}x\N{SUPERSCRIPT TWO}"
+    b_template = "{sign_b} {b}x"
+    c_template = "{sign_c} {c}"
+    template = a_template
+    if abs(b) >= sys.float_info.epsilon:
+        template += b_template
+    if abs(c) >= sys.float_info.epsilon:
+        template += c_template
+    template += " = 0"
+
+    sign_x_1 = ''
+    sign_x_2 = ''
+    sign_b = ' +'
+    sign_c = ' +'
+    if type(x_1) == complex:
+        x_1, sign_changed_1 = fix_complex_sign(x_1)
+        if sign_changed_1:
+            sign_x_1 = '-'
+    if type(x_2) == complex:
+        x_2, sign_changed_2 = fix_complex_sign(x_2)
+        if sign_changed_2:
+            sign_x_2 = '-'
+    if b < 0:
+        sign_b = ''
+    if c < 0:
+        sign_c = ''
+    equation = (template + " \N{RIGHTWARDS ARROW} "
+                           "x = {sign_x_1}{x1}").format(**locals())
+    if x_2 is not None:
+        equation += " or x = {sign_x_2}{x2}".format(**locals())
+    return equation
+
+
+print("ax\N{SUPERSCRIPT TWO} + bx + c = 0")
+a = get_float("enter a: ", False)
+b = get_float("enter b: ", True)
+c = get_float("enter c: ", True)
+
+x_1 = None
+x_2 = None
+discriminant = (b ** 2) - (4 * a * c)
+if discriminant == 0:
+    x_1 = -(b / (2 * a))
+    if abs(x_1) < sys.float_info.epsilon:
+        x_1 = 0.0
+else:
+    if discriminant > 0:
+        root = math.sqrt(discriminant)
+    else:
+        root = cmath.sqrt(discriminant)
+    x_1 = (-b + root) / (2 * a)
+    x_2 = (-b - root) / (2 * a)
+
+print(make_equation(a, b, c, x_1, x_2))
+
+\end{lstlisting}
+\section*{Exercise 3}
+\addcontentsline{toc}{section}{Exercise 3}
+\begin{lstlisting}[language=Python, style=pythonStyle]
+import sys
+from xml.sax.saxutils import escape
+
+
+def main():
+    # Get files from command line.
+    # Usage: python3 Ch02Ex03.py <input_filename> <output_filename>
+    input_filename = sys.argv[1]
+    output_filename = sys.argv[2]
+    max_width = 100
+    table = ""
+    table += print_start()
+    count = 0
+
+    # Read in data from file instead, instead of with call to input()
+    file_object = open(input_filename, "r")
+    data = file_object.read()
+    file_object.close()
+
+    # Convert data to html
+    lines = data.splitlines()
+    for line in lines:
+        try:
+            if count == 0:
+                color = "lightgreen"
+            elif count % 2 == 0:
+                color = "white"
+            else:
+                color = "lightyellow"
+            table = print_line(table, line, color, max_width)
+            count += 1
+        except EOFError:
+            break
+    table += print_end()
+
+    # Dump html into output file
+    output_file_object = open(output_filename, "w")
+    output_file_object.write(table)
+    output_file_object.close()
+
+
+def print_start():
+    return "<table border='1'>\n"
+
+
+def print_end():
+    return "</table>\n"
+
+
+def print_line(table, line, color, max_width):
+    table += "<tr bgcolor='{0}'>\n".format(color)
+    fields = extract_fields(line)
+    for field in fields:
+        if not field:
+            table += "<td></td>\n"
+        else:
+            number = field.replace(",", "")
+            try:
+                x = float(number)
+                table += "<td align='right'>{0:d}</td>\n".format(round(x))
+            except ValueError:
+                field = field.title()
+                field = field.replace(" And ", " and ")
+                if len(field) <= max_width:
+                    field = escape(field)
+                else:
+                    field = "{0} ...".format(escape(field[:max_width]))
+                table += "<td>{0}</td>\n".format(field)
+    table += "</tr>\n"
+    return table
+
+
+def extract_fields(line):
+    fields = []
+    field = ""
+    quote = None
+    for c in line:
+        if c in "\"'":
+            if quote is None:           # start of quoted string
+                quote = c
+            elif quote == c:            # end of quoted string
+                quote = None
+            else:
+                field += c              # other quote inside quoted string
+            continue
+        if quote is None and c == ",":  # end of a field
+            fields.append(field)
+            field = ""
+        else:
+            field += c                  # accumulating a field
+    if field:
+        fields.append(field)            # adding the last field
+    return fields
+
+
+main()
+
+\end{lstlisting}
+
+\section*{Exercise 4}
+\addcontentsline{toc}{section}{Exercise 4}
+\begin{lstlisting}[language=Python, style=pythonStyle]
 
 \end{lstlisting}
 \end{document}
