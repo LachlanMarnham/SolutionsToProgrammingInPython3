@@ -3,21 +3,20 @@ from xml.sax.saxutils import escape
 
 USAGE_TEXT = """
 usage:
-Ch02Ex04.py [maxwidth=int] [format=str] <infile.csv> <outfile.html>
+python3 Ch02Ex04.py [maxwidth=int] [format=str] <infile.csv> <outfile.html>
 
 maxwidth is an optional integer; if specified, it sets the maximum
 number of characters that can be output for string fields,
 otherwise a default of 100 characters is used.
 
 format is the format to use for numbers; if not specified it 
-defaults to ".0f". Allowed format types are float (f), binary (b)
-decimal (d), octal (0), lowercase hexidecimal (x), uppercase
-hexidecimal (X)
+defaults to ".0f". For allowed format types, see Figure 2.6.
 """
+NUMBER_TEMPLATE = "<td align='right'>{0:{1}}</td>\n"
+
 
 def main():
-    # Get files from command line.
-    # Usage: python3 Ch02Ex03.py <input_filename> <output_filename>
+    # Get parameters from command line
     max_width, int_format = process_options(sys.argv)
     if max_width is None or int_format is None:
         return
@@ -27,7 +26,7 @@ def main():
     table += print_start()
     count = 0
 
-    # Read in data from file instead, instead of with call to input()
+    # Read in data from file, instead of with call to input()
     file_object = open(input_filename, "r")
     data = file_object.read()
     file_object.close()
@@ -55,34 +54,48 @@ def main():
 
 
 def process_options(cmd_args):
-    maxwidth = 100
+    # Set the defaults. These will change if the user has defined alternatives
+    max_width = 100
     int_format = '.0f'
+    # Produce the USAGE_TEXT if user asks for help, otherwise handle maxwidth
+    # and format if they are defined by the user
     if cmd_args[1] in ('-h', '--help'):
         print(USAGE_TEXT)
         return None, None
     else:
+        # cmd_args[1:-2] excludes the script name, input filename and output
+        # filename, leaving only maxwidth and format should they exist.
         for arg in cmd_args[1:-2]:
             if 'maxwidth' in arg:
                 width_num = arg.replace('maxwidth=', '')
                 try:
+                    # If the user enters maxwidth=5.0, this is a valid integer
+                    # but not a valid int. We should handle this.
                     if '.' in width_num:
-                        maxwidth = int(float(width_num))
+                        max_width = int(float(width_num))
                     else:
-                        maxwidth = int(width_num)
+                        max_width = int(width_num)
+                # If the user entered a width that couldn't be converted to an
+                # int terminate the program
                 except ValueError:
                     print('Incorrect value for '
                           'maxwidth. Enter an '
                           'integer.')
-                    maxwidth = None
+                    max_width = None
+                    break
             elif 'format' in arg:
                 int_format = arg.replace('format=', '')
+                # Call str.format(...) and terminate the program if an
+                # exception is raised
                 try:
                     '{0:{1}}'.format(1, int_format)
                 except ValueError as e:
                     print('Incorrect value for format. '
                           + e.__str__() + '.')
                     int_format = None
-        return maxwidth, int_format       
+                    break
+
+        return max_width, int_format
 
 
 def print_start():
@@ -103,7 +116,8 @@ def print_line(table, line, color, max_width, int_format):
             number = field.replace(",", "")
             try:
                 x = float(number)
-                table += "<td align='right'>{0:{1}}</td>\n".format(round(x), int_format)
+                # const NUMBER_TEMPLATE is defined so this line isn't too long
+                table += NUMBER_TEMPLATE.format(round(x), int_format)
             except ValueError:
                 field = field.title()
                 field = field.replace(" And ", " and ")
