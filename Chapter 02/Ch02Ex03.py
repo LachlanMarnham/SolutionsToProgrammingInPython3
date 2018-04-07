@@ -12,7 +12,7 @@ def main():
     table += print_start()
     count = 0
 
-    # Read in data from file instead, instead of with call to input()
+    # Read in data from file, instead of with call to input()
     file_object = open(input_filename, "r")
     data = file_object.read()
     file_object.close()
