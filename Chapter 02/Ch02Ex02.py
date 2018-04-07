@@ -12,7 +12,7 @@ def get_float(msg, allow_zero):
                 print("zero is not allowed")
                 x = None
         except ValueError as err:
-            print(err)
+            print(err.__str__())
     return x
 
 
@@ -33,37 +33,42 @@ def fix_complex_sign(number):
     return new_number, changed_flag
 
 
-def make_equation(a, b, c, x_1, x_2):
+def make_equation(coef_a, coef_b, coef_c, solution_1, solution_2):
     a_template = "{a}x\N{SUPERSCRIPT TWO}"
     b_template = "{sign_b} {b}x"
     c_template = "{sign_c} {c}"
     template = a_template
-    if abs(b) >= sys.float_info.epsilon:
+
+    # Linear and constant terms will only appear in the equation if their
+    # coefficients are non-zero
+    if abs(coef_b) >= sys.float_info.epsilon:
         template += b_template
-    if abs(c) >= sys.float_info.epsilon:
+    if abs(coef_c) >= sys.float_info.epsilon:
         template += c_template
     template += " = 0"
 
+    # Handle negative numbers with the replacement, e.g., '+-6'-->'-6'
     sign_x_1 = ''
     sign_x_2 = ''
     sign_b = ' +'
     sign_c = ' +'
-    if type(x_1) == complex:
-        x_1, sign_changed_1 = fix_complex_sign(x_1)
+    if type(solution_1) == complex:
+        solution_1, sign_changed_1 = fix_complex_sign(solution_1)
         if sign_changed_1:
             sign_x_1 = '-'
-    if type(x_2) == complex:
-        x_2, sign_changed_2 = fix_complex_sign(x_2)
+    if type(solution_2) == complex:
+        solution_2, sign_changed_2 = fix_complex_sign(solution_2)
         if sign_changed_2:
             sign_x_2 = '-'
-    if b < 0:
+    if coef_b < 0:
         sign_b = ''
-    if c < 0:
+    if coef_c < 0:
         sign_c = ''
     equation = (template + " \N{RIGHTWARDS ARROW} "
                            "x = {sign_x_1}{x1}").format(**locals())
-    if x_2 is not None:
+    if solution_2 is not None:
         equation += " or x = {sign_x_2}{x2}".format(**locals())
+
     return equation
 
 
@@ -72,19 +77,24 @@ a = get_float("enter a: ", False)
 b = get_float("enter b: ", True)
 c = get_float("enter c: ", True)
 
+# x_1 and x_2 are the roots of the equation
 x_1 = None
 x_2 = None
 discriminant = (b ** 2) - (4 * a * c)
-if discriminant == 0:
-    x_1 = -(b / (2 * a))
+# If the discriminant is zero, there is only one root
+if abs(discriminant) <= sys.float_info.epsilon:
+    x_1 = - (b / (2 * a))
     if abs(x_1) < sys.float_info.epsilon:
         x_1 = 0.0
 else:
+    # If the discriminant is positive, there are two real roots
     if discriminant > 0:
-        root = math.sqrt(discriminant)
+        delta = math.sqrt(discriminant)
+    # If the discriminant is negative, there are two complex roots
     else:
-        root = cmath.sqrt(discriminant)
-    x_1 = (-b + root) / (2 * a)
-    x_2 = (-b - root) / (2 * a)
+        delta = cmath.sqrt(discriminant)
+
+    x_1 = (-b + delta) / (2 * a)
+    x_2 = (-b - delta) / (2 * a)
 
 print(make_equation(a, b, c, x_1, x_2))
