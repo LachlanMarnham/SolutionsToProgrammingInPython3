@@ -14,6 +14,12 @@ ACTIONS = {
         'S': SAVE,
         'Q': QUIT,
 }
+ACTION_TO_PROMPT = {
+    ADD: 'Add item: ',
+    DELETE: 'Delete item number (or 0 to cancel): ',
+    SAVE: 'Press Enter to continue... ',
+    QUIT: 'Save unsaved changes? (y/n): ',
+}
 
 
 def get_file_names_from_dir(directory, extension):
@@ -32,7 +38,7 @@ def display_files(file_names):
             print("Please enter an integer.")
             continue
         if 0 < selection < len(options):
-            return f_name
+            return file_names[selection - 1]
         elif selection == 0:
             return input("Enter new file name: ")
 
@@ -59,26 +65,65 @@ def get_action():
 
 
 def get_items(filename):
-    with open(DATA_DIRECTORY + filename, 'r') as f:
+    with open(filename, 'r') as f:
         items = f.read().strip('\n').splitlines()
     return sorted(items, key=lambda s: s.lower())
+
+
+def add_new_item(items):
+    new_item = input(ACTION_TO_PROMPT[ADD])
+    items.append(new_item)
+    sort_items(items)
+    return items
+
+
+def delete_item(items):
+    index_to_delete = int(input(ACTION_TO_PROMPT[DELETE])) - 1
+    if not index_to_delete + 1:
+        return
+    else:
+        try:
+            items.pop(index_to_delete)
+        except IndexError:
+            print('Invalid index.')
+
+
+def save_items(items, filename):
+    with open(filename, 'w') as f:
+        f.write('\n'.join(items))
+
+
+def check_save_and_quit(items, filename, unsaved_changes):
+    action = input(ACTION_TO_PROMPT[QUIT])
+    if action.lower() != 'n' and unsaved_changes:
+        save_items(items, filename)
+    sys.exit(0)
 
 
 def main():
     chosen_filename = files_switch(DATA_DIRECTORY, FILE_EXTENSION)
     items = get_items(chosen_filename)
+    unsaved_changes_flag = False
     while True:
+        if len(items) == 0:
+            print('-- no items are in the list --')
+        else:
+            item_display = ''
+            for i, item in enumerate(items):
+                item_display += "\n{}: {}".format(i + 1, item)
+            print(item_display)
         action = get_action()
         if action == ADD:
-            pass
+            add_new_item(items)
+            unsaved_changes_flag = True
         elif action == DELETE:
-            pass
+            delete_item(items)
+            unsaved_changes_flag = True
         elif action == SAVE:
-            pass
+            save_items(items, chosen_filename)
+            unsaved_changes_flag = False
         elif action == QUIT:
-            sys.exit(0)
-        else:
-            raise NotImplementedError("Something went wrong")
+            check_save_and_quit(items, chosen_filename, unsaved_changes_flag)
 
 
 main()
